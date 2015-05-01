@@ -35,9 +35,28 @@ BEGIN_MESSAGE_MAP(CMeshViewerView, CView)
 	ON_WM_MOUSEMOVE()
 	ON_WM_DESTROY()
 	ON_WM_SIZE()
+	ON_COMMAND(ID_FILE_OPEN, &CMeshViewerView::OnFileOpen)
 END_MESSAGE_MAP()
 
 // CMeshViewerView construction/destruction
+
+namespace {
+
+	string replaceAll(const string &str, const string &pattern, const string &replace)   
+	{   
+		string result = str;   
+		string::size_type pos = 0;   
+		string::size_type offset = 0;   
+
+		while((pos = result.find(pattern, offset)) != string::npos)   
+		{   
+			result.replace(result.begin() + pos, result.begin() + pos + pattern.size(), replace);   
+			offset = pos + replace.size();   
+		}   
+
+		return result;   
+	}
+}
 
 CMeshViewerView::CMeshViewerView()
 {
@@ -157,6 +176,10 @@ void CMeshViewerView::DrawScene(void)
 
 	//glPointSize(2.0);
 	//glColor3f(view_color[0],view_color[1],view_color[2]);
+	
+	if(triMesh.get() == nullptr) {
+		return;
+	}
 
 	if(m_OnCharNum[1]) {
 		TriMeshOpenGLUtil::DisplayMesh(*(triMesh.get()));
@@ -179,6 +202,10 @@ void CMeshViewerView::DrawScene(void)
 
 void CMeshViewerView::SetSimulationSpace(const TriMesh& mesh, const TriMesh::BBox& box)
 {
+	if(triMesh.get() == nullptr) {
+		return;
+	}
+
 	glMatrixMode(GL_MODELVIEW);
 
 	// 경계박스에 맞춰서 물체 이동
@@ -282,12 +309,7 @@ int CMeshViewerView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	m_cx = lpCreateStruct->cx;
 	m_cy = lpCreateStruct->cy;
-
-	triMesh = auto_ptr<TriMesh>(TriMesh::read("../Data/bunny.obj"));
-	triMesh->need_bbox();
-	triMesh->need_bsphere();
-	triMesh->need_normals();
-
+	
 	Lights lights;
 	lights.Add(new Light(
 		vec3(0.0, 100.0, 100.0),
@@ -309,8 +331,6 @@ int CMeshViewerView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	m_SimulationBox.max = point(10.F, 10.F, 10.F);
 	m_SimulationBox.min = point(-10.F, -10.F, -10.F);
-
-	SetSimulationSpace(*(triMesh.get()), triMesh->bbox);
 
 	m_fZoom = 1.F;
 	m_fPosX = 0.F;
@@ -406,4 +426,39 @@ void CMeshViewerView::OnSize(UINT nType, int cx, int cy)
 
 	// Model view
 	glMatrixMode(GL_MODELVIEW);
+}
+
+
+void CMeshViewerView::OnFileOpen()
+{
+	// TODO: Add your command handler code here
+
+	CFileDialog dlg( TRUE, L"*.obj", NULL, OFN_FILEMUSTEXIST, L"OBJ Files(*.obj)|STL Files(*.stl)|" );
+
+	if( dlg.DoModal() == IDOK )
+	{
+		CString m_strPath = dlg.GetPathName();
+
+		int length = m_strPath.GetLength();
+		char* st;
+		st = new char[length + 1];
+		st[length] = '/0';
+		WideCharToMultiByte(CP_ACP,0,(LPCWSTR)m_strPath,length + 1,st,length + 1,NULL,NULL);
+		triMesh = auto_ptr<TriMesh>(TriMesh::read(st));
+		//triMesh = auto_ptr<TriMesh>(TriMesh::read("../Data/bunny.obj"));
+		
+		if (!st) {
+			delete[] st;
+		}
+		
+		if(triMesh.get() == nullptr) {
+			return;
+		}
+
+		triMesh->need_bbox();
+		triMesh->need_bsphere();
+		triMesh->need_normals();
+
+		SetSimulationSpace(*(triMesh.get()), triMesh->bbox);
+	}
 }

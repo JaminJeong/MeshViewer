@@ -6,11 +6,13 @@
 
 #include <glut.h>
 #include <memory>
+#include <string>
 #include <bitset>
 #include "../TriMesh/TriMesh.h"
 
 using std::auto_ptr;
 using std::bitset;
+using std::string;
 using Graphics::TriMeshSpace::TriMesh;
 
 #pragma comment( lib, "opengl32.lib" )       // Search For OpenGL32.lib While Linking
@@ -80,6 +82,7 @@ public:
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnDestroy();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnFileOpen();
 };
 
 #ifndef _DEBUG  // debug version in MeshViewerView.cpp
