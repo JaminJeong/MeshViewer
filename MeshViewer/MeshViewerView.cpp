@@ -288,7 +288,24 @@ int CMeshViewerView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	triMesh->need_bsphere();
 	triMesh->need_normals();
 
-	Render3DOpenGLView::SetLight(Lights());
+	Lights lights;
+	lights.Add(new Light(
+		vec3(0.0, 100.0, 100.0),
+		vec3(0.0, 0.0, 0.0),
+		Color(0.6f, 0.6f, 0.6f),
+		Color(1.0f, 1.0f, 1.0f),
+		Color(1.0f, 1.0f, 1.0f)
+	));
+
+	lights.Add(new Light(
+		vec3(100.0, 100.0, 0.0),
+		vec3(0.0, 0.0, 0.0),
+		Color(0.6f, 0.6f, 0.6f),
+		Color(1.0f, 1.0f, 1.0f),
+		Color(1.0f, 1.0f, 1.0f)
+	));
+
+	Render3DOpenGLView::SetLight(lights);
 
 	m_SimulationBox.max = point(10.F, 10.F, 10.F);
 	m_SimulationBox.min = point(-10.F, -10.F, -10.F);

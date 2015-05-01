@@ -2,11 +2,6 @@
 #include "../../Extern/glut/include/glut.h"
 #include "../../TriMesh/Vec.h"
 
-//#include "../../RenderEngine/light.h"
-//#include "../../RenderEngine/camera.h"
-//#include "../../RenderEngine/projection.h"
-//#include "../../RenderEngine/viewport.h"
-
 namespace Render3D{
 
     using RenderEngine::Camera;
@@ -17,35 +12,49 @@ namespace Render3D{
 
     using namespace Graphics::TriMeshSpace;
 
-    void Render3DOpenGLView::SetLight(const Lights& /*lights*/)
-	{
-		GLfloat lightPos0[] = {0.0,100.0,100.0,1.0};
-		GLfloat lightPos1[] = {100.0,100.0,0.0,1.0};
-		float ambLight[] = {0.6f, 0.6f, 0.6f, 1.0f}; //Ambient 값을 설정해 준다. 
-		float specular[] = {1.0f, 1.0f, 1.0f, 1.0f}; //Specular 값을 설정해 준다. 
-		float specref[] = {1.0f, 1.0f, 1.0f, 1.0f}; //Specular 재질값을 설정한다.
+	namespace {
 
+		void SetLightPrameter(GLenum openGLLightNum, GLenum openGLLigghtType, const Color& color)
+		{
+			const float light4[] = {color[0], color[1], color[2], 1.F};
+			glLightfv(openGLLightNum, openGLLigghtType, light4);
+		}
+
+		void SetLightPrameter(GLenum openGLLightNum, GLenum openGLLigghtType, const vec3& temp)
+		{
+			const float temp3[] = {temp[0], temp[1], temp[2], 1.F};
+			glLightfv(openGLLightNum, openGLLigghtType, temp3);
+		}
+	}
+
+    void Render3DOpenGLView::SetLight(const Lights& lights)
+	{
 		glEnable(GL_LIGHTING); //조명을 사용하도록 한다.
 
-		glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambLight); //저장된 값으로 주변광을 설정한다.
+		//float ambLight[] = {0.6f, 0.6f, 0.6f, 1.0f}; //Ambient 값을 설정해 준다. 
+		//glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambLight); //저장된 값으로 주변광을 설정한다.
 
-		glLightfv(GL_LIGHT0, GL_DIFFUSE, ambLight); //Diffuse설정Ambient와 동일한 값으로 줘도 되고 다른 값을 줘도 된다.
-		glLightfv(GL_LIGHT0, GL_SPECULAR, specular); //Specular 설정
-		glLightfv(GL_LIGHT0, GL_POSITION, lightPos0); //위치 설정
+		int count =  0;
+		for (Lights::ConstIterator itr = lights.Begin(); itr != lights.End(); ++itr)
+		{
+			SetLightPrameter(GL_LIGHT0 + count, GL_AMBIENT, (*itr)->GetAmbientLight());
+			SetLightPrameter(GL_LIGHT0 + count, GL_DIFFUSE, (*itr)->GetDiffuseLight());
+			SetLightPrameter(GL_LIGHT0 + count, GL_SPECULAR, (*itr)->GetSpecularLight());
+			SetLightPrameter(GL_LIGHT0 + count, GL_POSITION, (*itr)->GetPosition());
+			glEnable(GL_LIGHT0 + count); //조명 사용
+			++count;
+		}
+			
+		//glLightfv(GL_LIGHT1, GL_DIFFUSE, ambLight); //Diffuse설정Ambient와 동일한 값으로 줘도 되고 다른 값을 줘도 된다.
+		//glLightfv(GL_LIGHT1, GL_SPECULAR, specular); //Specular 설정
+		//glLightfv(GL_LIGHT1, GL_POSITION, lightPos0); //위치 설정
 
-		glLightfv(GL_LIGHT1, GL_DIFFUSE, ambLight); //Diffuse설정Ambient와 동일한 값으로 줘도 되고 다른 값을 줘도 된다.
-		glLightfv(GL_LIGHT1, GL_SPECULAR, specular); //Specular 설정
-		glLightfv(GL_LIGHT1, GL_POSITION, lightPos0); //위치 설정
+		//glEnable(GL_COLOR_MATERIAL); //재질에 영향을 받도록 한다.
 
-		glEnable(GL_COLOR_MATERIAL); //재질에 영향을 받도록 한다.
+		//glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE); //재질 색상을 오브젝트의 색상으로 한다.
 
-		glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE); //재질 색상을 오브젝트의 색상으로 한다.
-
-		glMaterialfv(GL_FRONT, GL_SPECULAR, specref); //Specular 설정
-		glMateriali(GL_FRONT, GL_SHININESS, 128);
-
-		glEnable(GL_LIGHT0); //0번 조명 사용
-		glEnable(GL_LIGHT1); //1번 조명 사용
+		//glMaterialfv(GL_FRONT, GL_SPECULAR, specref); //Specular 설정
+		//glMateriali(GL_FRONT, GL_SHININESS, 128);
 
 		glShadeModel(GL_SMOOTH); //GL_FLAT을 주면 각져 보인다.
 		glFrontFace(GL_CCW);

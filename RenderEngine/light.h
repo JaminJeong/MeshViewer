@@ -12,18 +12,25 @@ namespace RenderEngine {
 			const vec3& position,
 			const vec3& direction,
 			const Color& diffuseLight,
-			const vec4& ambientLight,
-			const vec4& specularLigt
+			const Color& ambientLight,
+			const Color& specularLight
 		);
 
         ~Light();
 
+	public:
+		const vec3& GetPosition() const;
+		const vec3& GetDirection() const;
+		const Color& GetDiffuseLight() const;
+		const Color& GetAmbientLight() const;
+		const Color& GetSpecularLight() const;
+
 	private:
 		vec3 m_Position;
 		vec3 m_Direction;
-		vec4 m_DiffuseLight;
-		vec4 m_AmbientLight;
-		vec4 m_SpecularLigt;
+		Color m_DiffuseLight;
+		Color m_AmbientLight;
+		Color m_SpecularLigt;
 	};
 
     class Lights
@@ -36,6 +43,12 @@ namespace RenderEngine {
         ~Lights();
     
 	public:
+		typedef ContainerType::const_iterator ConstIterator;
+
+	public:
+		ConstIterator Begin() const;
+		ConstIterator End() const;
+
 		void Add(const Light* light);
 
 	private:
