@@ -2,6 +2,7 @@
 #define RENDERENGINE
 
 #include "../TriMesh/TriMesh.h"
+#include "../Type/Util.h"
 
 namespace RenderEngine {
     using namespace Graphics::TriMeshSpace;
@@ -11,4 +12,3 @@ namespace RenderEngine {
     typedef float Float;
 }
 #endif // RENDERENGINE
-

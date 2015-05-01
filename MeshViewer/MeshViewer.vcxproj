@@ -123,6 +123,7 @@
     <ClInclude Include="..\TriMesh\TriMesh_algo.h" />
     <ClInclude Include="..\TriMesh\Vec.h" />
     <ClInclude Include="..\TriMesh\XForm.h" />
+    <ClInclude Include="..\Type\Util.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="MeshViewer.h" />
     <ClInclude Include="MeshViewerDoc.h" />

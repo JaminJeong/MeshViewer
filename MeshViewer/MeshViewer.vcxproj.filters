@@ -28,6 +28,9 @@
     <Filter Include="Render3DView\OpenGL">
       <UniqueIdentifier>{d8054833-5e19-4686-ae15-74375e04e1fd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Type">
+      <UniqueIdentifier>{d43a823a-00b9-4758-9818-19142149e957}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -113,6 +116,9 @@
     </ClInclude>
     <ClInclude Include="..\OpenGLUtil\TriMeshOpenGLUtil.h">
       <Filter>Render3DView\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Type\Util.h">
+      <Filter>Type</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
