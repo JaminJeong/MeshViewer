@@ -83,6 +83,7 @@ public:
 	afx_msg void OnDestroy();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnFileOpen();
+	afx_msg void OnAppExit();
 };
 
 #ifndef _DEBUG  // debug version in MeshViewerView.cpp

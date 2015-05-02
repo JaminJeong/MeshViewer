@@ -36,6 +36,7 @@ BEGIN_MESSAGE_MAP(CMeshViewerView, CView)
 	ON_WM_DESTROY()
 	ON_WM_SIZE()
 	ON_COMMAND(ID_FILE_OPEN, &CMeshViewerView::OnFileOpen)
+	ON_COMMAND(ID_APP_EXIT, &CMeshViewerView::OnAppExit)
 END_MESSAGE_MAP()
 
 // CMeshViewerView construction/destruction
@@ -336,6 +337,8 @@ int CMeshViewerView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_fPosX = 0.F;
 	m_fPosY = 0.F;
 
+	m_OnCharNum[1] = true;
+
 	return 0;
 }
 
@@ -433,7 +436,8 @@ void CMeshViewerView::OnFileOpen()
 {
 	// TODO: Add your command handler code here
 
-	CFileDialog dlg( TRUE, L"*.obj", NULL, OFN_FILEMUSTEXIST, L"OBJ Files(*.obj)|STL Files(*.stl)|" );
+	CFileDialog dlg( TRUE, L"*.obj", NULL, OFN_FILEMUSTEXIST,
+		L"OBJ (*.obj)|*.obj|OFF (*.off;*.off)|*.off|STL (*.stl)|*.stl|All OBJ File(*.obj;*.off;*.stl)|*.obj; *.off; *.stl|All Files (*.*)|*.*||");
 
 	if( dlg.DoModal() == IDOK )
 	{
@@ -461,4 +465,11 @@ void CMeshViewerView::OnFileOpen()
 
 		SetSimulationSpace(*(triMesh.get()), triMesh->bbox);
 	}
+}
+
+
+void CMeshViewerView::OnAppExit()
+{
+	// TODO: Add your command handler code here
+	::PostQuitMessage(WM_QUIT); // QUIT
 }
