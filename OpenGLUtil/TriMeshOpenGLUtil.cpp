@@ -5,6 +5,24 @@ namespace Graphics{ namespace OpenGL{
 
 	const float PI = 3.14f;
 
+	void TriMeshOpenGLUtil::DrawLine(const point& start, const point& end, const Color& color)
+	{
+		glColor3f(color[0], color[1], color[2]);
+		//glLineWidth(1.F);
+		glBegin(GL_LINES);
+		glVertex3f(start[0], start[1], start[2]);
+		glVertex3f(end[0], end[1], end[2]);
+		glEnd();
+	}
+
+	void TriMeshOpenGLUtil::DrawPoint(const point& startPoint, const Color& color)
+	{
+		glColor3f(color[0], color[1], color[2]);
+		glBegin(GL_POINTS);
+		glVertex3f(startPoint[0], startPoint[1], startPoint[2]);
+		glEnd();
+	}
+
 	void TriMeshOpenGLUtil::DisplayWireMesh(const TriMesh& mesh)
 	{
 		for (unsigned int count = 0; count < mesh.faces.size(); ++count) {

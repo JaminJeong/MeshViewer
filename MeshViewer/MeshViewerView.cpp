@@ -14,6 +14,7 @@
 
 #include "../Render3DView/OpenGL/render3dopenglview.h"
 
+#include "../TriMesh/XForm.h"
 #include "../OpenGLUtil/TriMeshOpenGLUtil.h"
 
 using namespace RenderEngine;
@@ -39,9 +40,63 @@ BEGIN_MESSAGE_MAP(CMeshViewerView, CView)
 	ON_COMMAND(ID_APP_EXIT, &CMeshViewerView::OnAppExit)
 END_MESSAGE_MAP()
 
+Graphics::TriMeshSpace::point cameraPosition;
+
 // CMeshViewerView construction/destruction
 
 namespace {
+
+	auto_ptr<TriMesh> MakeBackPlane(const TriMesh& inputMesh, Float inputScale = 1.F)
+	{
+		auto_ptr<TriMesh> triBackPlaneMesh = auto_ptr<TriMesh>(new TriMesh());
+		point backPlane[4];
+		backPlane[0] = point(
+			inputMesh.bbox.min[0],
+			inputMesh.bbox.min[1],
+			inputMesh.bbox.max[2]
+		);
+		backPlane[1] = point(
+			inputMesh.bbox.min[0],
+			inputMesh.bbox.max[1],
+			inputMesh.bbox.max[2]
+		);
+		backPlane[2] = point(
+			inputMesh.bbox.max[0],
+			inputMesh.bbox.max[1],
+			inputMesh.bbox.max[2]
+		);
+		backPlane[3] = point(
+			inputMesh.bbox.max[0],
+			inputMesh.bbox.min[1],
+			inputMesh.bbox.max[2]
+		);
+
+		point sumPoint;
+
+		for (int count = 0; count < 4; ++count)
+		{
+			sumPoint += backPlane[count];
+		}
+		sumPoint /= 4.F;
+
+		xform scaleMat = xform::trans(sumPoint) * xform::scale(inputScale) * xform::trans(-sumPoint);
+		for (int count = 0; count < 4; ++count)
+		{
+			backPlane[count] = scaleMat * backPlane[count];
+		}
+
+		for (int count = 0; count < 4; ++count)
+		{
+			triBackPlaneMesh->vertices.push_back(backPlane[count]);
+		}
+
+		triBackPlaneMesh->faces.push_back(TriMesh::Face(0, 1, 2));
+		triBackPlaneMesh->faces.push_back(TriMesh::Face(0, 2, 3));
+
+		triBackPlaneMesh->need_normals();
+
+		return triBackPlaneMesh;
+	}
 
 	string replaceAll(const string &str, const string &pattern, const string &replace)   
 	{   
@@ -196,6 +251,20 @@ void CMeshViewerView::DrawScene(void)
 	}
 	if(m_OnCharNum[5]) {
 		glutWireCube(len(triMesh->bbox.size()));
+	}
+	if (m_OnCharNum[6]) {
+		TriMeshOpenGLUtil::DisplayMesh(*(triBackPlaneMesh.get()));
+	}
+	if (m_OnCharNum[7]) {
+		TriMeshOpenGLUtil::DrawPoint(cameraPosition, Color::red());
+	}
+	if (m_OnCharNum[8]) {
+		for (int count = 0; count < triMesh->vertices.size(); ++count)
+		{
+			if (count % 10 == 0) {
+				TriMeshOpenGLUtil::DrawLine(cameraPosition, triMesh->vertices[count], Color::red());
+			}
+		}
 	}
 
 	SwapBuffers(wglGetCurrentDC()); 
@@ -459,9 +528,13 @@ void CMeshViewerView::OnFileOpen()
 			return;
 		}
 
+		cameraPosition = point(0.F, 0.F, 10.F);
+
 		triMesh->need_bbox();
 		triMesh->need_bsphere();
 		triMesh->need_normals();
+
+		triBackPlaneMesh = MakeBackPlane(*(triMesh.get()), 2.F);
 
 		SetSimulationSpace(*(triMesh.get()), triMesh->bbox);
 	}

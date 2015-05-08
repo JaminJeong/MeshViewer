@@ -18,6 +18,8 @@ namespace Graphics{ namespace OpenGL{
 		static void DisplayMesh(TriMesh& mesh);
 		static void DisplayWireMesh(const TriMesh& mesh);
 		static void DrawBoxALL(const TriMesh::BBox* box);
+		static void DrawLine(const point& start, const point& end, const Color& color = Color::red());
+		static void DrawPoint(const point& startPoint, const Color& color = Color::red());
 	};
 
 }}

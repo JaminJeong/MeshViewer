@@ -60,7 +60,9 @@ public:
 	float m_cx;
 	float m_cy;
 
+public:
 	auto_ptr<TriMesh> triMesh;
+	auto_ptr<TriMesh> triBackPlaneMesh;
 	bitset<256> m_OnCharNum;
 	TriMesh::BBox m_SimulationBox;
 
