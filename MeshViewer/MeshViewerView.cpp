@@ -253,10 +253,29 @@ void CMeshViewerView::DrawScene(void)
 		glutWireCube(len(triMesh->bbox.size()));
 	}
 	if (m_OnCharNum[6]) {
-		TriMeshOpenGLUtil::DisplayMesh(*(triBackPlaneMesh.get()));
+		TriMeshOpenGLUtil::DisplayWireMesh(*(triBackPlaneMesh.get()));
 	}
 	if (m_OnCharNum[7]) {
-		TriMeshOpenGLUtil::DrawPoint(cameraPosition, Color::red());
+		point backCenter = point(triMesh->bbox.center()[0], triMesh->bbox.center()[1], triMesh->bbox.max[2]);
+		point cameraToBack = backCenter - cameraPosition;
+		point normalCameraToBack = cameraToBack;
+		float lenCameraToBack = len(normalCameraToBack);
+		normalize(normalCameraToBack);
+
+		for (int count = 0; count < triMesh->vertices.size(); ++count)
+		{
+			if (count % 10 == 0) {
+				point direction = triMesh->vertices[count] - cameraPosition;
+				float dirLen = len(direction);
+				float DotCameraToBackAndDirection = normalCameraToBack DOT direction;
+				dirLen = dirLen * lenCameraToBack / DotCameraToBackAndDirection;
+				normalize(direction);
+				direction *= dirLen;
+				direction += cameraPosition;
+
+				TriMeshOpenGLUtil::DrawPoint(direction, Color::red());
+			}
+		}
 	}
 	if (m_OnCharNum[8]) {
 		for (int count = 0; count < triMesh->vertices.size(); ++count)
