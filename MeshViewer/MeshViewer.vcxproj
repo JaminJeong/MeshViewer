@@ -43,8 +43,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\jungjm\Desktop\MeshViewer\Extern\glut\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\jungjm\Desktop\MeshViewer\Extern\glut\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\Extern\glut\include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\MeshViewer\Extern\glut\lib;$(LibraryPath)</LibraryPath>
     <ExecutablePath>$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

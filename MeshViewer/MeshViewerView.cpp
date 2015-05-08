@@ -40,7 +40,7 @@ BEGIN_MESSAGE_MAP(CMeshViewerView, CView)
 	ON_COMMAND(ID_APP_EXIT, &CMeshViewerView::OnAppExit)
 END_MESSAGE_MAP()
 
-Graphics::TriMeshSpace::point cameraPosition;
+Graphics::TriMeshSpace::point cameraPosition(0.F, 0.F, -1.F);
 
 // CMeshViewerView construction/destruction
 
@@ -266,6 +266,28 @@ void CMeshViewerView::DrawScene(void)
 			}
 		}
 	}
+	if (m_OnCharNum[9]) {
+		point backCenter = point(triMesh->bbox.center()[0], triMesh->bbox.center()[1], triMesh->bbox.max[2]);
+		point cameraToBack = backCenter - cameraPosition;
+		point normalCameraToBack = cameraToBack;
+		float lenCameraToBack = len(normalCameraToBack);
+		normalize(normalCameraToBack);
+
+		for (int count = 0; count < triMesh->vertices.size(); ++count)
+		{
+			if (count % 10 == 0) {
+				point direction = triMesh->vertices[count] - cameraPosition;
+				float dirLen = len(direction);
+				float DotCameraToBackAndDirection = normalCameraToBack DOT direction;
+				dirLen = dirLen * lenCameraToBack / DotCameraToBackAndDirection;
+				normalize(direction);
+				direction *= dirLen;
+				direction += cameraPosition;
+
+				TriMeshOpenGLUtil::DrawLine(cameraPosition, direction, Color::red());
+			}
+		}
+	}
 
 	SwapBuffers(wglGetCurrentDC()); 
 }
@@ -486,7 +508,8 @@ void CMeshViewerView::OnSize(UINT nType, int cx, int cy)
 	
 	Render3DOpenGLView::SetCamera(
 		Camera(
-			point(0.F, 10.F, 0.F),
+			cameraPosition,
+			//point(0.F, 10.F, 0.F),
 			point(0.F, 0.F, 0.F),
 			point(0.F, 1.F, 0.F)
 			)
@@ -513,22 +536,22 @@ void CMeshViewerView::OnFileOpen()
 		CString m_strPath = dlg.GetPathName();
 
 		int length = m_strPath.GetLength();
-		char* st;
-		st = new char[length + 1];
-		st[length] = '/0';
-		WideCharToMultiByte(CP_ACP,0,(LPCWSTR)m_strPath,length + 1,st,length + 1,NULL,NULL);
-		triMesh = auto_ptr<TriMesh>(TriMesh::read(st));
+		char* filePath;
+		filePath = new char[length + 1];
+		filePath[length] = '/0';
+		WideCharToMultiByte(CP_ACP, 0, (LPCWSTR)m_strPath, length + 1, filePath, length + 1, NULL, NULL);
+		triMesh = auto_ptr<TriMesh>(TriMesh::read(filePath));
 		//triMesh = auto_ptr<TriMesh>(TriMesh::read("../Data/bunny.obj"));
 		
-		if (!st) {
-			delete[] st;
+		if (!filePath) {
+			delete[] filePath;
 		}
-		
+
 		if(triMesh.get() == nullptr) {
 			return;
 		}
 
-		cameraPosition = point(0.F, 0.F, 10.F);
+		//cameraPosition = point(triMesh->bbox.center()[0], triMesh->bbox.center()[1], triMesh->bbox.max[2] * 10.F);
 
 		triMesh->need_bbox();
 		triMesh->need_bsphere();
