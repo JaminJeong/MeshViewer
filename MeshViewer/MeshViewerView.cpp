@@ -98,6 +98,34 @@ namespace {
 		return triBackPlaneMesh;
 	}
 
+	shared_ptr<TriMesh> MakeProjectionPoint(const TriMesh& triMesh, const point& cameraPosition)
+	{
+		shared_ptr<TriMesh> backProjectionMesh = shared_ptr<TriMesh>(new TriMesh());
+
+		point backCenter = point(triMesh.bbox.center()[0], triMesh.bbox.center()[1], triMesh.bbox.max[2]);
+		point cameraToBack = backCenter - cameraPosition;
+		point normalCameraToBack = cameraToBack;
+		float lenCameraToBack = len(normalCameraToBack);
+		normalize(normalCameraToBack);
+
+		for (int count = 0; count < triMesh.vertices.size(); ++count)
+		{
+			point direction = triMesh.vertices[count] - cameraPosition;
+			float dirLen = len(direction);
+			float DotCameraToBackAndDirection = normalCameraToBack DOT direction;
+			dirLen = dirLen * lenCameraToBack / DotCameraToBackAndDirection;
+			normalize(direction);
+			direction *= dirLen;
+			direction += cameraPosition;
+
+			backProjectionMesh->vertices.push_back(direction);
+		}
+
+		backProjectionMesh->need_bbox();
+
+		return backProjectionMesh;
+	}
+
 	string replaceAll(const string &str, const string &pattern, const string &replace)   
 	{   
 		string result = str;   
@@ -237,6 +265,8 @@ void CMeshViewerView::DrawScene(void)
 		return;
 	}
 
+	shared_ptr<TriMesh> backProjectionMesh = MakeProjectionPoint(*(triMesh.get()), cameraPosition);
+
 	if(m_OnCharNum[1]) {
 		TriMeshOpenGLUtil::DisplayMesh(*(triMesh.get()));
 	}
@@ -256,24 +286,10 @@ void CMeshViewerView::DrawScene(void)
 		TriMeshOpenGLUtil::DisplayWireMesh(*(triBackPlaneMesh.get()));
 	}
 	if (m_OnCharNum[7]) {
-		point backCenter = point(triMesh->bbox.center()[0], triMesh->bbox.center()[1], triMesh->bbox.max[2]);
-		point cameraToBack = backCenter - cameraPosition;
-		point normalCameraToBack = cameraToBack;
-		float lenCameraToBack = len(normalCameraToBack);
-		normalize(normalCameraToBack);
-
-		for (int count = 0; count < triMesh->vertices.size(); ++count)
+		for (int count = 0; count < backProjectionMesh->vertices.size(); ++count)
 		{
 			if (count % 10 == 0) {
-				point direction = triMesh->vertices[count] - cameraPosition;
-				float dirLen = len(direction);
-				float DotCameraToBackAndDirection = normalCameraToBack DOT direction;
-				dirLen = dirLen * lenCameraToBack / DotCameraToBackAndDirection;
-				normalize(direction);
-				direction *= dirLen;
-				direction += cameraPosition;
-
-				TriMeshOpenGLUtil::DrawPoint(direction, Color::red());
+				TriMeshOpenGLUtil::DrawPoint(backProjectionMesh->vertices[count], Color::red());
 			}
 		}
 	}
@@ -286,29 +302,15 @@ void CMeshViewerView::DrawScene(void)
 		}
 	}
 	if (m_OnCharNum[9]) {
-		point backCenter = point(triMesh->bbox.center()[0], triMesh->bbox.center()[1], triMesh->bbox.max[2]);
-		point cameraToBack = backCenter - cameraPosition;
-		point normalCameraToBack = cameraToBack;
-		float lenCameraToBack = len(normalCameraToBack);
-		normalize(normalCameraToBack);
-
-		for (int count = 0; count < triMesh->vertices.size(); ++count)
+		for (int count = 0; count < backProjectionMesh->vertices.size(); ++count)
 		{
 			if (count % 10 == 0) {
-				point direction = triMesh->vertices[count] - cameraPosition;
-				float dirLen = len(direction);
-				float DotCameraToBackAndDirection = normalCameraToBack DOT direction;
-				dirLen = dirLen * lenCameraToBack / DotCameraToBackAndDirection;
-				normalize(direction);
-				direction *= dirLen;
-				direction += cameraPosition;
-
-				TriMeshOpenGLUtil::DrawLine(cameraPosition, direction, Color::red());
+				TriMeshOpenGLUtil::DrawLine(cameraPosition, backProjectionMesh->vertices[count], Color::red());
 			}
 		}
 	}
 
-	SwapBuffers(wglGetCurrentDC()); 
+	SwapBuffers(wglGetCurrentDC());
 }
 
 void CMeshViewerView::SetSimulationSpace(const TriMesh& mesh, const TriMesh::BBox& box)
